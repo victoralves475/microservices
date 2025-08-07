@@ -2,7 +2,7 @@ package payment_adapter
 
 import (
 	"context"
-	"github.com/victoralves475/microservices-proto/golang/payment/payment"
+	"github.com/victoralves475/microservices-proto/golang/payment"
 	"github.com/victoralves475/microservices/order/internal/application/core/domain"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

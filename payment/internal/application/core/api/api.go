@@ -2,27 +2,22 @@ package api
 
 import (
 	"context"
-	"log"
 
-	"github.com/huseyinbabal/microservices/payment/internal/application/core/domain"
-	"github.com/huseyinbabal/microservices/payment/internal/ports"
+	"github.com/victoralves475/microservices/payment/internal/application/core/domain"
+	"github.com/victoralves475/microservices/payment/internal/ports"
 )
 
+// Application é o core da lógica de Payment.
 type Application struct {
-	db ports.DBPort
+	payment ports.PaymentPort
 }
 
-func NewApplication(db ports.DBPort) *Application {
-	return &Application{
-		db: db,
-	}
+// NewApplication cria a instância do core com a porta injetada.
+func NewApplication(payment ports.PaymentPort) *Application {
+	return &Application{payment: payment}
 }
 
-func (a Application) Charge(ctx context.Context, payment domain.Payment) (domain.Payment, error) {
-	log.Println("Iniciando o Charge...")
-	err := a.db.Save(ctx, &payment)
-	if err != nil {
-		return domain.Payment{}, err
-	}
-	return payment, nil
+// Charge é o caso de uso de criar um pagamento.
+func (a *Application) Charge(ctx context.Context, p domain.Payment) (domain.Payment, error) {
+	return a.payment.Charge(ctx, p)
 }

@@ -1,3 +1,16 @@
+payments
+
+export DB_DRIVER=mysql
+export DATA_SOURCE_URL="root:minhasenha@tcp(127.0.0.1:3306)/payment"
+export APPLICATION_PORT=3001
+export ENV=development
+
+
+
+order
+
+export PAYMENT_SERVICE_URL=localhost:3001
 export DATA_SOURCE_URL="root:minhasenha@tcp(127.0.0.1:3306)/order"
 export APPLICATION_PORT=3000
 export ENV=development
+

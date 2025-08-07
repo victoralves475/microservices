@@ -5,46 +5,54 @@ import (
 	"log"
 	"net"
 
-	"github.com/huseyinbabal/microservices/payment/config"
-	"github.com/huseyinbabal/microservices/payment/internal/ports"
-	"github.com/ruandg/microservices-proto/golang/payment"
-	"google.golang.org/grpc/reflection"
-
+	paymentpb "github.com/victoralves475/microservices-proto/golang/payment"
+	"github.com/victoralves475/microservices/payment/config"
+	"github.com/victoralves475/microservices/payment/internal/ports"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
-type Adapter struct {
-	api    ports.APIPort
-	port   int
-	server *grpc.Server
-	payment.UnimplementedPaymentServer
+// Server encapsula o servidor gRPC de Payment.
+type Server struct {
+	grpcServer *grpc.Server
+	adapter    *Adapter
+	port       int
 }
 
-func NewAdapter(api ports.APIPort, port int) *Adapter {
-	return &Adapter{api: api, port: port}
-}
+// NewServer monta o servidor gRPC, registra o handler e, se em dev, habilita reflection.
+func NewServer(paymentPort ports.PaymentPort, port int) *Server {
+	adapter := NewAdapter(paymentPort)
 
-func (a Adapter) Run() {
-	var err error
+	srv := grpc.NewServer()
+	paymentpb.RegisterPaymentServer(srv, adapter)
 
-	listen, err := net.Listen("tcp", fmt.Sprintf(":%d", a.port))
-	if err != nil {
-		log.Fatalf("failed to listen on port %d, error: %v", a.port, err)
-	}
-
-	grpcServer := grpc.NewServer()
-	a.server = grpcServer
-	payment.RegisterPaymentServer(grpcServer, a)
 	if config.GetEnv() == "development" {
-		reflection.Register(grpcServer)
+		reflection.Register(srv)
 	}
 
-	log.Printf("starting payment service on port %d ...", a.port)
-	if err := grpcServer.Serve(listen); err != nil {
-		log.Fatalf("failed to serve grpc on port ")
+	return &Server{
+		grpcServer: srv,
+		adapter:    adapter,
+		port:       port,
 	}
 }
 
-func (a Adapter) Stop() {
-	a.server.Stop()
+// Start inicia o servidor na porta configurada.
+func (s *Server) Start() {
+	addr := fmt.Sprintf(":%d", s.port)
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		log.Fatalf("failed to listen on %s: %v", addr, err)
+	}
+	log.Printf("Payment gRPC server listening on %s", addr)
+	if err := s.grpcServer.Serve(lis); err != nil {
+		log.Fatalf("failed to serve gRPC on %s: %v", addr, err)
+	}
+}
+
+// Stop encerra graciosamente o servidor gRPC.
+func (s *Server) Stop() {
+	if s.grpcServer != nil {
+		s.grpcServer.GracefulStop()
+	}
 }
