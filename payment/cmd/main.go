@@ -1,12 +1,14 @@
 package main
 
 import (
+	"github.com/victoralves475/microservices/payment/internal/adapters/grpc"
 	"os"
 
-	"github.com/huseyinbabal/microservices/payment/config"
-	"github.com/huseyinbabal/microservices/payment/internal/adapters/db"
-	"github.com/huseyinbabal/microservices/payment/internal/adapters/grpc"
-	"github.com/huseyinbabal/microservices/payment/internal/application/core/api"
+	"github.com/victoralves475/microservices/payment/config"
+	"github.com/victoralves475/microservices/payment/internal/adapters/db"
+	_ "github.com/victoralves475/microservices/payment/internal/adapters/grpc"
+	api "github.com/victoralves475/microservices/payment/internal/application/core/api"
+
 	log "github.com/sirupsen/logrus"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/jaeger"
