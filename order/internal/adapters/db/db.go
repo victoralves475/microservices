@@ -78,3 +78,7 @@ func (a Adapter) Save(order *domain.Order) error {
 	}
 	return res.Error
 }
+
+func (a *Adapter) Update(o *domain.Order) error {
+	return a.db.Save(o).Error
+}

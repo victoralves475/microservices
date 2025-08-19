@@ -3,6 +3,7 @@ module github.com/victoralves475/microservices/order
 go 1.24.5
 
 require (
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/victoralves475/microservices-proto/golang/order v0.0.0-20250806142414-250cf94e83a9
 	github.com/victoralves475/microservices-proto/golang/payment v0.0.0-00010101000000-000000000000
 	google.golang.org/grpc v1.74.2

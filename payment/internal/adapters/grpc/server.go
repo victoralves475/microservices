@@ -12,32 +12,22 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-// Server encapsula o servidor gRPC de Payment.
 type Server struct {
 	grpcServer *grpc.Server
 	adapter    *Adapter
 	port       int
 }
 
-// NewServer monta o servidor gRPC, registra o handler e, se em dev, habilita reflection.
-func NewServer(paymentPort ports.PaymentPort, port int) *Server {
-	adapter := NewAdapter(paymentPort)
-
+func NewServer(api ports.APIPort, port int) *Server {
+	adapter := NewAdapter(api)
 	srv := grpc.NewServer()
 	paymentpb.RegisterPaymentServer(srv, adapter)
-
 	if config.GetEnv() == "development" {
 		reflection.Register(srv)
 	}
-
-	return &Server{
-		grpcServer: srv,
-		adapter:    adapter,
-		port:       port,
-	}
+	return &Server{grpcServer: srv, adapter: adapter, port: port}
 }
 
-// Start inicia o servidor na porta configurada.
 func (s *Server) Start() {
 	addr := fmt.Sprintf(":%d", s.port)
 	lis, err := net.Listen("tcp", addr)
@@ -50,7 +40,6 @@ func (s *Server) Start() {
 	}
 }
 
-// Stop encerra graciosamente o servidor gRPC.
 func (s *Server) Stop() {
 	if s.grpcServer != nil {
 		s.grpcServer.GracefulStop()

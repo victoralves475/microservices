@@ -32,17 +32,14 @@ func (a *Adapter) Register(server *grpc.Server) {
 func (a *Adapter) Create(ctx context.Context, req *paymentpb.CreatePaymentRequest) (*paymentpb.CreatePaymentResponse, error) {
 	log.Println("Creating payment...")
 
-	// Constrói o domínio de pagamento
 	newPayment := domain.NewPayment(req.UserId, req.OrderId, req.TotalPrice)
-
-	// Executa a cobrança na porta de negócio
 	result, err := a.api.Charge(ctx, newPayment)
 	if err != nil {
+		if status.Code(err) == codes.InvalidArgument {
+			return nil, err // devolve como veio
+		}
 		return nil, status.Errorf(codes.Internal, "failed to charge: %v", err)
 	}
 
-	// Retorna o ID do pagamento criado
-	return &paymentpb.CreatePaymentResponse{
-		PaymentId: result.ID,
-	}, nil
+	return &paymentpb.CreatePaymentResponse{PaymentId: result.ID}, nil
 }
